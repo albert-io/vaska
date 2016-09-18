@@ -192,14 +192,6 @@ class ExternalAPI {
       throw new Error(`Resource ${id} was never initialized.`);
     } else {
       let res = null;
-      // TODO This probably needs to go away and be described outside of the context of resource
-      // if (!process.env.IS_BROWSER && haveRequestToken(requestId)) {
-      //   Object.assign(header, {
-      //     Authorization: getRequestToken(requestId)
-      //   });
-      //   auth = true;
-      // }
-      // End TODO
       try {
         res = resource.get({
           id: id,
@@ -299,7 +291,6 @@ class Resource {
     });
     let path = this.endpointTemplate;
 
-    // TODO reconsider
     if (isInvalidRequest(params)) {
       console.warn( //eslint-disable-line no-console
         `The specified parameters ${params} were not fully specified for resource ${id}.

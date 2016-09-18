@@ -13,4 +13,4 @@ Our main platform at [albert.io](https://www.albert.io) is a single page applica
 
 ## Usage
 
-T
+Please check out our [guide](linkgoeshere.com) for some sample use cases!
