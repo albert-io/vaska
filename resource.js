@@ -107,6 +107,7 @@ class Payload {
   invalidatesResource(resourceId) {
     if (this.invalidatedResources.isEmpty()) {
       this.promise.then(() => {
+        console.log('resolved and invalidating ', resourceId);
         this.invalidatedResources.forEach((id) => {
           this.parentApi.resourcePool
             .get(id, new Map())
@@ -117,7 +118,7 @@ class Payload {
       });
     }
 
-    this.invalidatedResources.add(resourceId);
+    this.invalidatedResources = this.invalidatedResources.add(resourceId);
 
     return this;
   }
