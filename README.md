@@ -55,3 +55,11 @@ function getUser(username) {
   });
 }
 ```
+
+Any call to `queryResource()` is guaranteed to return an object of type `Payload`. If this resource was never queried before in the application, a request will be queued up and will be inserted into the cache once it resolves and the returned payload will have the empty model we specified in our resource definition above. This allows us to maintain a purely declarative component. Repeat calls to this same query resource will not result in a new request. A payload is always guaranteed to have three attributes that we care about:
+
+1. `data` - Either the most recent response we saw from the server for this request or the empty model specified in the resource definition
+2. `promise` - A promise which resolves with either the most recent, non-stale data we received from this endpoint.
+3. A status. You can ask this payload if it has data that came from the server with `hasServerData()`, if it `isPending()` any response from the server, or if this request returned any non 2xx status code (or otherwise threw any exceptions) with `isValid()`.
+
+This explains the basic usage and functionality, though does not adequately demonstrate why this approach is beneficial. For how this looks within an actual React application, check out some of the [examples](examplesgohere.com).
