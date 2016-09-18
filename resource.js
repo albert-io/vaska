@@ -477,7 +477,8 @@ class Resource {
   makePut({
     path = '',
     payload,
-    header
+    header,
+    customHookData
   }) {
     const fullPath = this.parentApi.location
       .concat(path);
@@ -521,7 +522,8 @@ class Resource {
   makePost({
     path = '',
     payload,
-    header
+    header,
+    customHookData
   }) {
     const fullPath = this.parentApi.location
       .concat(path);
@@ -564,7 +566,8 @@ class Resource {
 
   makeDelete({
     path = '',
-    header
+    header,
+    customHookData
   }) {
     const fullPath = this.parentApi.location
       .concat(path);
