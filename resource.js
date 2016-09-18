@@ -36,7 +36,8 @@ class Payload {
     data,
     promise = Promise.resolve(new Map()),
     parentApi,
-    error
+    error,
+    customHookData
     /* eslint-enable no-unused-vars */
   }) {
     this._data = data;
@@ -87,13 +88,15 @@ class Payload {
 
   affectsResource(resourceObject) {
     if (this.affectedResources.isEmpty()) {
-      this.promise.then(() => {
+      this.promise.then((response) => {
         this.affectedResources.forEach((resource) => {
           const key = keyBuilder(resource);
           this.parentApi.resourcePool
             .get(resource.id)
             .invalidateCacheKey(key);
         });
+
+        this.parentApi.postResponseHook({payload: fromJS(response), customHookData: this.customHookData});
       }).catch((error) => {
         console.error('Could not update affected resource due to error: ', error); //eslint-disable-line no-console
       });
@@ -106,14 +109,14 @@ class Payload {
 
   invalidatesResource(resourceId) {
     if (this.invalidatedResources.isEmpty()) {
-      this.promise.then(() => {
+      this.promise.then((response) => {
         this.invalidatedResources.forEach((id) => {
-          this.parentApi.resourcePool
-            .get(id, new Map())
-            .forEach((resource, key) => {
-              resource.invalidateCache();
-            });
+          const resource = this.parentApi.resourcePool
+            .get(id, new Map());
+          resource.invalidateCache();
         });
+
+        this.parentApi.postResponseHook({payload: fromJS(response), customHookData: this.customHookData});
       });
     }
 
@@ -250,7 +253,7 @@ class Resource {
   }
 
   invalidateCache() {
-    this.cache = this.cache.map((cacheKey, value) => {
+    this.cache = this.cache.map((value, cacheKey) => {
       return value.has('timestamp') ? value.set('timestamp', 0) : value;
     });
   }
@@ -281,7 +284,8 @@ class Resource {
       return new Payload({
         status: DataStatus.ERROR,
         promise: new Promise.resolve(this.model),
-        data: this.model
+        data: this.model,
+        customHookData
       });
     }
 
@@ -300,7 +304,8 @@ class Resource {
       return new Payload({
         status: DataStatus.ERROR,
         promise: new Promise.resolve(this.model),
-        data: this.modelInterface ? new this.modelInterface(this.model) : this.model
+        data: this.modelInterface ? new this.modelInterface(this.model) : this.model,
+        customHookData
       });
     }
 
@@ -328,7 +333,8 @@ class Resource {
           return new Payload({
             status: status,
             promise: data.get('pendingGet'),
-            data: this.modelInterface ? new this.modelInterface(payload) : payload
+            data: this.modelInterface ? new this.modelInterface(payload) : payload,
+            customHookData
           });
         // Last GET for this resource failed and the cache is not yet expired
         } else if (!data.get('success') && (now - data.get('timestamp')) < this.timeUntilStale) {
@@ -338,7 +344,8 @@ class Resource {
               reject(data.get('data'));
             }),
             data: this.modelInterface ? new this.modelInterface(this.model) : this.model,
-            error: data.get('data')
+            error: data.get('data'),
+            customHookData
           });
         // Last GET is fresh
         } else if ((now - data.get('timestamp')) < this.timeUntilStale && !forceRefresh) {
@@ -347,21 +354,24 @@ class Resource {
             promise: new Promise((resolve) => {
               resolve(data.get('data'));
             }),
-            data: this.modelInterface ? new this.modelInterface(data.get('data')) : data.get('data')
+            data: this.modelInterface ? new this.modelInterface(data.get('data')) : data.get('data'),
+            customHookData
           });
         // GET is STALE
         } else {
           return new Payload({
             status: DataStatus.STALE,
             promise: this.makeFetch(apiParams),
-            data: this.modelInterface ? new this.modelInterface(data.get('data')) : data.get('data')
+            data: this.modelInterface ? new this.modelInterface(data.get('data')) : data.get('data'),
+            customHookData
           });
         }
       } else {
         return new Payload({
           status: DataStatus.EMPTY,
           promise: this.makeFetch(apiParams),
-          data: this.modelInterface ? new this.modelInterface(this.model) : this.model
+          data: this.modelInterface ? new this.modelInterface(this.model) : this.model,
+          customHookData
         });
       }
     } else if (method === 'put') {
@@ -369,21 +379,24 @@ class Resource {
         status: DataStatus.PENDING_PUT,
         promise: this.makePut(apiParams),
         data: null,
-        parentApi: this.parentApi
+        parentApi: this.parentApi,
+        customHookData
       });
     } else if (method === 'post') {
       return new Payload({
         status: DataStatus.PENDING_POST,
         promise: this.makePost(apiParams),
         data: null,
-        parentApi: this.parentApi
+        parentApi: this.parentApi,
+        customHookData
       });
     } else if (method === 'delete') {
       return new Payload({
         status: DataStatus.PENDING_DELETE,
         promise: this.makeDelete(apiParams),
         data: null,
-        parentApi: this.parentApi
+        parentApi: this.parentApi,
+        customHookData
       });
     }
   }
