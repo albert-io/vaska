@@ -2,7 +2,7 @@
   "name": "vaska",
   "version": "1.0.0",
   "description": "Client data cache management library",
-  "main": "index.js",
+  "main": "resource.js",
   "scripts": {
     "test": "mocha"
   },
