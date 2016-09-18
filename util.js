@@ -23,7 +23,7 @@ function isServer() {
 }
 
 function isStatusSuccess(status) {
-  return status >= 200 && status < 300;
+  return status >= 200 && status < 300 || status === 304;
 }
 
 function normalizeError(err, status) {

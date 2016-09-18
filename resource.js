@@ -504,7 +504,7 @@ class Resource {
             }
           }
 
-          if (err || isStatusSuccess(status)) {
+          if (err || !isStatusSuccess(status)) {
             const normalizedError = normalizeError(err, status);
             this.parentApi.postResponseHook({error: normalizedError, customHookData});
             return reject(normalizedError);
@@ -549,7 +549,7 @@ class Resource {
             }
           }
 
-          if (err || isStatusSuccess(status)) {
+          if (err || !isStatusSuccess(status)) {
             const normalizedError = normalizeError(err, status);
             this.parentApi.postResponseHook({error: normalizedError, customHookData});
             return reject(normalizedError);
@@ -580,7 +580,7 @@ class Resource {
         .end((err, res) => {
           const status = res.status;
 
-          if (err || isStatusSuccess(status)) {
+          if (err || !isStatusSuccess(status)) {
             const normalizedError = normalizeError(err, status);
             this.parentApi.postResponseHook({error: normalizedError, customHookData});
             return reject(normalizedError);
