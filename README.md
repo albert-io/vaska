@@ -18,7 +18,7 @@ Our main platform at [albert.io](https://www.albert.io) is a single page applica
 To begin, we need only the `ExternalAPI` class from the library. This class represents a single REST API with which your application will communicate.
 
 ```
-const testAPI = new r.ExternalAPI({
+const testAPI = new vaska.ExternalAPI({
   location: 'http://localhost:3000'
 });
 ```
