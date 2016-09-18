@@ -23,7 +23,7 @@ const testAPI = new r.ExternalAPI({
 });
 ```
 
-We may then declare any number of `resources` which represent various resources we may request, create, or modify the various entities on the server. A `resource` in this context typically has a one-to-one mapping to a specific endpoint, though this is not necessarily enforced or required.
+We may then declare any number of `resources` which represent various entities we may request, create, or modify on the server. A `resource` in this context typically has a one-to-one mapping to a specific endpoint, though this is not necessarily enforced or required.
 
 ```
 const userResource = {
