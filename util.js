@@ -15,11 +15,11 @@ function isInvalidRequest(params) {
 }
 
 function isBrowser() {
-  return !(typeof module !== 'undefined' && module.exports);
+  return window && window.location;
 }
 
 function isServer() {
-  return typeof module !== 'undefined' && module.exports;
+  return window && window.location;
 }
 
 function isStatusSuccess(status) {
