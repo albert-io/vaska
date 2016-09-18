@@ -13,4 +13,45 @@ Our main platform at [albert.io](https://www.albert.io) is a single page applica
 
 ## Usage
 
-Please check out our [guide](linkgoeshere.com) for some sample use cases!
+### Simple case:
+
+To begin, we need only the `ExternalAPI` class from the library. This class represents a single REST API with which your application will communicate.
+
+```
+const testAPI = new r.ExternalAPI({
+  location: 'http://localhost:3000'
+});
+```
+
+We may then declare any number of `resources` which represent various resources we may request, create, or modify the various entities on the server. A `resource` in this context typically has a one-to-one mapping to a specific endpoint, though this is not necessarily enforced or required.
+
+```
+const userResource = {
+  id: 'USER',
+  endpoint: '/users/:username',
+  model: new Map({
+      username: '',
+      status: '',
+      task: ''
+  })
+};
+```
+
+We then register this resource with the API by invoking `addResource()` on the API.
+
+```
+testAPI.addResource(userResource);
+```
+
+From here, we declare functions which will work with the resource and serve as the interface to the model itself.
+
+```
+function getUser(username) {
+  return testAPI.queryResource({
+    id: userResource.id,
+    params: {
+      username
+    }
+  });
+}
+```
