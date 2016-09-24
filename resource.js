@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const request = require('superagent');
+const EventEmitter = require('events');
 const {
   fromJS,
   Map,
@@ -101,7 +102,7 @@ class Payload {
             .invalidateCacheKey(key);
         });
 
-        this.parentApi.postResponseHook({payload: fromJS(response), customHookData: this.customHookData});
+        this.parentApi.emit('change', {payload: fromJS(response), customHookData: this.customHookData});
       }).catch(() => {});
     }
 
@@ -119,7 +120,7 @@ class Payload {
           resource.invalidateCache();
         });
 
-        this.parentApi.postResponseHook({payload: fromJS(response), customHookData: this.customHookData});
+        this.parentApi.emit('change', {payload: fromJS(response), customHookData: this.customHookData});
       }).catch(() => {});
     }
 
@@ -129,23 +130,22 @@ class Payload {
   }
 }
 
-class ExternalAPI {
+class ExternalAPI extends EventEmitter {
   constructor({
     /* eslint-disable no-unused-vars */
     id = null,
     location,
-    postResponseHook = () => {},
     timeout = DEFAULT_REQUEST_TIMEOUT,
     cacheClearoutInterval = null,
     initialCache = new Map()
     /* eslint-enable no-unused-vars */
   }) {
+    super();
     this.id = id;
     this.location = location;
-    this.postResponseHook = postResponseHook;
     this.timeout = timeout;
     this.initialCache = initialCache;
-
+    this.cacheClearoutInterval = cacheClearoutInterval;
     this.resourcePool = new Map();
     this.authHeader = {};
   }
@@ -223,12 +223,14 @@ class ExternalAPI {
 
   setAuthHeader(authHeader) {
     this.authHeader = authHeader;
-    this.postResponseHook({});
+    this.resourcePool.map((resource) => { resource.invalidateCache() })
+    this.emit('change');
   }
 
   unsetAuthHeader() {
     this.authHeader = {};
-    this.postResponseHook({});
+    this.resourcePool.map((resource) => { resource.invalidateCache() })
+    this.emit('change');
   }
 }
 
@@ -448,7 +450,7 @@ class Resource {
                   });
                   this.cache = this.cache.set(cacheKey, data);
                 }
-                this.parentApi.postResponseHook({error: normalizedError, customHookData});
+                this.parentApi.emit('change', {error: normalizedError, customHookData});
                 return reject(normalizedError);
               }
             }
@@ -466,7 +468,7 @@ class Resource {
               this.cache = this.cache.set(cacheKey, data);
             }
 
-            this.parentApi.postResponseHook({error: normalizedError, customHookData});
+            this.parentApi.emit('change', {error: normalizedError, customHookData});
             return reject(normalizedError);
           } else {
             const immutablePayload = fromJS(payload);
@@ -477,7 +479,7 @@ class Resource {
             });
 
             this.cache = this.cache.set(cacheKey, data);
-            this.parentApi.postResponseHook({payload: immutablePayload, customHookData});
+            this.parentApi.emit('change', {payload: immutablePayload, customHookData});
             return resolve(immutablePayload);
           }
         });
@@ -524,7 +526,7 @@ class Resource {
                 payload = JSON.parse(res.text);
               } catch (error) {
                 const normalizedError = normalizeError(error, status);
-                this.parentApi.postResponseHook({error: normalizedError, customHookData});
+                this.parentApi.emit('change', {error: normalizedError, customHookData});
                 return reject(normalizedError);
               }
             }
@@ -532,11 +534,11 @@ class Resource {
 
           if (err || !isStatusSuccess(status)) {
             const normalizedError = normalizeError(err, status);
-            this.parentApi.postResponseHook({error: normalizedError, customHookData});
+            this.parentApi.emit('change', {error: normalizedError, customHookData});
             return reject(normalizedError);
           } else {
             const immutablePayload = fromJS(payload);
-            this.parentApi.postResponseHook({payload: immutablePayload, customHookData});
+            this.parentApi.emit('change', {payload: immutablePayload, customHookData});
             return resolve(immutablePayload);
           }
         });
@@ -569,7 +571,7 @@ class Resource {
                 payload = JSON.parse(res.text);
               } catch (error) {
                 const normalizedError = normalizeError(error, status);
-                this.parentApi.postResponseHook({error: normalizedError, customHookData});
+                this.parentApi.emit('change', {error: normalizedError, customHookData});
                 return reject(normalizedError);
               }
             }
@@ -577,11 +579,11 @@ class Resource {
 
           if (err || !isStatusSuccess(status)) {
             const normalizedError = normalizeError(err, status);
-            this.parentApi.postResponseHook({error: normalizedError, customHookData});
+            this.parentApi.emit('change', {error: normalizedError, customHookData});
             return reject(normalizedError);
           } else {
             const immutablePayload = fromJS(payload);
-            this.parentApi.postResponseHook({payload: immutablePayload, customHookData});
+            this.parentApi.emit('change', {payload: immutablePayload, customHookData});
             return resolve(immutablePayload);
           }
         });
@@ -608,10 +610,10 @@ class Resource {
 
           if (err || !isStatusSuccess(status)) {
             const normalizedError = normalizeError(err, status);
-            this.parentApi.postResponseHook({error: normalizedError, customHookData});
+            this.parentApi.emit('change', {error: normalizedError, customHookData});
             return reject(normalizedError);
           } else {
-            this.parentApi.postResponseHook({payload: new Map(), customHookData});
+            this.parentApi.emit('change', {payload: new Map(), customHookData});
             return resolve(new Map());
           }
         });
