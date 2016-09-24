@@ -218,10 +218,12 @@ class ExternalAPI {
 
   setAuthHeader(authHeader) {
     this.authHeader = authHeader;
+    this.postResponseHook({});
   }
 
   unsetAuthHeader() {
     this.authHeader = {};
+    this.postResponseHook({});
   }
 }
 
@@ -311,10 +313,11 @@ class Resource {
       return path.replace(`:${name}`, value)
     }, path);
 
+    const fullHeader = Object.assign({}, this.parentApi.authHeader, header);
     const apiParams = {
       path: path,
       query: query,
-      header: header,
+      header: fullHeader,
       cacheKey: cacheKey,
       payload: payload,
       customHookData
