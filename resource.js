@@ -21,6 +21,19 @@ const {
   normalizeError,
   keyBuilder
 } = require('./util');
+const Promise = require('bluebird');
+
+Promise.config({
+    // Enable warnings
+    warnings: false,
+    // Enable long stack traces
+    longStackTraces: false,
+    // Enable cancellation
+    cancellation: true,
+    // Enable monitoring
+    monitoring: false
+});
+
 
 function getEmptyPayload(model, modelInterface = {}) {
   return new Payload({
