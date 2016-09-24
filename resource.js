@@ -21,11 +21,12 @@ const {
   keyBuilder
 } = require('./util');
 
-function getEmptyPayload(model) {
+function getEmptyPayload(model, modelInterface = {}) {
   return new Payload({
     status: DataStatus.EMPTY,
     promise: Promise.resolve(model),
-    data: model
+    data: model,
+    modelInterface
   });
 }
 
@@ -37,7 +38,8 @@ class Payload {
     promise = Promise.resolve(new Map()),
     parentApi,
     error,
-    customHookData
+    customHookData,
+    modelInterface
     /* eslint-enable no-unused-vars */
   }) {
     this._data = data;
@@ -48,6 +50,9 @@ class Payload {
     this.parentApi = parentApi;
     this.affectedResources = new Set();
     this.invalidatedResources = new Set();
+    if (modelInterface) {
+      this.interface = new modelInterface(this._data);
+    }
   }
 
   hasServerData() {
@@ -285,7 +290,8 @@ class Resource {
         status: DataStatus.ERROR,
         promise: Promise.resolve(this.model),
         data: this.model,
-        customHookData
+        customHookData,
+        modelInterface: this.modelInterface
       });
     }
 
@@ -304,8 +310,9 @@ class Resource {
       return new Payload({
         status: DataStatus.ERROR,
         promise: Promise.resolve(this.model),
-        data: this.modelInterface ? new this.modelInterface(this.model) : this.model,
-        customHookData
+        data: this.model,
+        customHookData,
+        modelInterface: this.modelInterface
       });
     }
 
@@ -334,8 +341,9 @@ class Resource {
           return new Payload({
             status: status,
             promise: data.get('pendingGet'),
-            data: this.modelInterface ? new this.modelInterface(payload) : payload,
-            customHookData
+            data: payload,
+            customHookData,
+            modelInterface: this.modelInterface
           });
         // Last GET for this resource failed and the cache is not yet expired
         } else if (!data.get('success') && (now - data.get('timestamp')) < this.timeUntilStale) {
@@ -344,9 +352,10 @@ class Resource {
             promise: new Promise((resolve, reject) => {
               reject(data.get('data'));
             }),
-            data: this.modelInterface ? new this.modelInterface(this.model) : this.model,
+            data: this.model,
             error: data.get('data'),
-            customHookData
+            customHookData,
+            modelInterface: this.modelInterface
           });
         // Last GET is fresh
         } else if ((now - data.get('timestamp')) < this.timeUntilStale && !forceRefresh) {
@@ -355,24 +364,27 @@ class Resource {
             promise: new Promise((resolve) => {
               resolve(data.get('data'));
             }),
-            data: this.modelInterface ? new this.modelInterface(data.get('data')) : data.get('data'),
-            customHookData
+            data: data.get('data'),
+            customHookData,
+            modelInterface: this.modelInterface
           });
         // GET is STALE
         } else {
           return new Payload({
             status: DataStatus.STALE,
             promise: this.makeFetch(apiParams),
-            data: this.modelInterface ? new this.modelInterface(data.get('data')) : data.get('data'),
-            customHookData
+            data: data.get('data'),
+            customHookData,
+            modelInterface: this.modelInterface
           });
         }
       } else {
         return new Payload({
           status: DataStatus.EMPTY,
           promise: this.makeFetch(apiParams),
-          data: this.modelInterface ? new this.modelInterface(this.model) : this.model,
-          customHookData
+          data: this.model,
+          customHookData,
+          modelInterface: this.modelInterface
         });
       }
     } else if (method === 'put') {
