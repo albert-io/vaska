@@ -1,6 +1,6 @@
 {
   "name": "vaska",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Client data cache management library",
   "main": "resource.js",
   "scripts": {
