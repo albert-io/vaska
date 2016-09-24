@@ -97,9 +97,7 @@ class Payload {
         });
 
         this.parentApi.postResponseHook({payload: fromJS(response), customHookData: this.customHookData});
-      }).catch((error) => {
-        console.error('Could not update affected resource due to error: ', error); //eslint-disable-line no-console
-      });
+      }).catch(() => {});
     }
 
     this.affectedResources = this.affectedResources.add(resourceObject);
@@ -117,7 +115,7 @@ class Payload {
         });
 
         this.parentApi.postResponseHook({payload: fromJS(response), customHookData: this.customHookData});
-      });
+      }).catch(() => {});
     }
 
     this.invalidatedResources = this.invalidatedResources.add(resourceId);
