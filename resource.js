@@ -281,7 +281,7 @@ class Resource {
       console.error(`Authentication required at endpoint ${this.endpointTemplate} for resource ${id}`); //eslint-disable-line no-console
       return new Payload({
         status: DataStatus.ERROR,
-        promise: new Promise.resolve(this.model),
+        promise: Promise.resolve(this.model),
         data: this.model,
         customHookData
       });
@@ -301,7 +301,7 @@ class Resource {
 
       return new Payload({
         status: DataStatus.ERROR,
-        promise: new Promise.resolve(this.model),
+        promise: Promise.resolve(this.model),
         data: this.modelInterface ? new this.modelInterface(this.model) : this.model,
         customHookData
       });
