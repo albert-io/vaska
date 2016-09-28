@@ -76,55 +76,55 @@ Vaska exposes only a single class that you will ever need to instantiate.
 
 This class takes in a single JSON object which represents the configuration of the API this object will represent. This is the only thing you will ever directly interact with in this library. You can find a sample usage above. The `ExternalAPI` is also an event emitter that emits the `change` event anytime anything changes in the cache or the configuration of the API. The possible configuration options are:
 
-* id - _string_ - A unique string identifier that represents this API
-* location - _string_ - The root address of this API server (e.g. `http://localhost:3000`)
-* timeout - _integer_ - The default time to live for any cache data, in _ms_. Default: 60000
-* cacheClearoutInterval - _integer_ - Optional interval to completely purge the cache of any item the cache interns `cacheClearoutInterval` ms after retrieval. Absence of this option will result in the resources never being completely purged (stale data will live in the cache for the full duration of the process)
-* initialCache - _Immutable Map_ - Optional initial state of the cache. Useful for re-hydrating the cache in the browser.
+* *id* - _string_ - A unique string identifier that represents this API
+* *location* - _string_ - The root address of this API server (e.g. `http://localhost:3000`)
+* *timeout* - _integer_ - The default time to live for any cache data, in _ms_. Default: 60000
+* *cacheClearoutInterval* - _integer_ - Optional interval to completely purge the cache of any item the cache interns `cacheClearoutInterval` ms after retrieval. Absence of this option will result in the resources never being completely purged (stale data will live in the cache for the full duration of the process)
+* *initialCache* - _Immutable Map_ - Optional initial state of the cache. Useful for re-hydrating the cache in the browser.
 
 The available methods are:
 
-* addResource(resource) - Takes in a plain JSON object that describes a resource this API will track. See below for resource configuration options. This will register the resource with the cache such that you can `queryResource` it later. Returns nothing.
-* removeResource(id) - De-registers the resource with this ID from the cache, deleting its cache and making it no longer query-able. Returns nothing.
-* queryResource(queryObject) - Takes in a plain JSON object that describes the kind of query you want to make against the resource. Returns a `Payload`.
-* isAuthenticated() - Returns `true` if the current API is aware of authentication information you want it to use when querying the API
-* setAuthHeader(header) - Takes in a plain JSON object which represents the header to be attached to all requests against this API. Causes a `change` event to fire.
-* unsetAuthHeader() - Removes the authHeader set above and clears out the entire cache. Emits `change` event.
+* *addResource(resource)* - Takes in a plain JSON object that describes a resource this API will track. See below for resource configuration options. This will register the resource with the cache such that you can `queryResource` it later. Returns nothing.
+* *removeResource(id)* - De-registers the resource with this ID from the cache, deleting its cache and making it no longer query-able. Returns nothing.
+* *queryResource(queryObject)* - Takes in a plain JSON object that describes the kind of query you want to make against the resource. Returns a `Payload`.
+* *isAuthenticated()* - Returns `true` if the current API is aware of authentication information you want it to use when querying the API
+* *setAuthHeader(header)* - Takes in a plain JSON object which represents the header to be attached to all requests against this API. Causes a `change` event to fire.
+* *unsetAuthHeader()* - Removes the authHeader set above and clears out the entire cache. Emits `change` event.
 
 ### Resource
 
 A resource is a plain JSON object that describes an endpoint and any interactions you can make with it. A resource configuration has these fields available to you:
 
-* endpointTemplate - _string_ - Required. The template for the path at which this resource lives. You may specify path parameters by using the `:` notation. E.g. `/users/:username` indicates that this endpoint will expect a username when queried against.
-* timeUntilStale - _integer_ - Optional. The time to live of this resource, in ms. If not specified, it will use the time to live specified on the ExternalAPI this resource belongs to.
-* model - _Immutable object_ - Optional. A representation of what the data you expect to get from this endpoint looks like. This is also the object you will get back if you query the API for a resource it does not yet have.
-* modelInterface - _Class_ - Optional. An optional class which will be attached to every `Payload` returned from querying this resource. The `Payload`'s data will be passed into the constructor of this class and you may access any methods or properties of this class from the payload via the `interface` attribute on the payload.
-* authRequired - _boolean_ - Optional. Boolean that indicates whether auth is necessary when querying this resource. If set to `true` and the user is not authenticated (via the `setAuthHeader` method on the `ExternalAPI`), the request will not be made on `queryResource`, saving a failed trip to the server.
+* *endpointTemplate* - _string_ - Required. The template for the path at which this resource lives. You may specify path parameters by using the `:` notation. E.g. `/users/:username` indicates that this endpoint will expect a username when queried against.
+* *timeUntilStale* - _integer_ - Optional. The time to live of this resource, in ms. If not specified, it will use the time to live specified on the ExternalAPI this resource belongs to.
+* *model* - _Immutable object_ - Optional. A representation of what the data you expect to get from this endpoint looks like. This is also the object you will get back if you query the API for a resource it does not yet have.
+* *modelInterface* - _Class_ - Optional. An optional class which will be attached to every `Payload` returned from querying this resource. The `Payload`'s data will be passed into the constructor of this class and you may access any methods or properties of this class from the payload via the `interface` attribute on the payload.
+* *authRequired* - _boolean_ - Optional. Boolean that indicates whether auth is necessary when querying this resource. If set to `true` and the user is not authenticated (via the `setAuthHeader` method on the `ExternalAPI`), the request will not be made on `queryResource`, saving a failed trip to the server.
 
 ### Payload
 
 A wrapper for a piece of data from the cache. Every `queryResource` call will return one of these. It is guaranteed to have the following methods:
 
-* data - Getter that gives you the data that the cache has received from the server for this query, or the empty model if it does not yet have data.
-* promise - Getter that gives you a promise representing any pending query against the server. This is always available, even if there is not one currently pending (in that case it is a promise that immediately resolves with `data` from above)
-* error - Getter that gives you the error that the server received the last time this query completed against this resource.
-* hasServerData() - Returns `true` if this payload represents data from the server (whether stale or not).
-* isPending() - Returns `true` if there is currently a query pending against the server for data.
-* isEmpty() - Returns `true` if the Payload is empty and its data is the empty model specified on configuration of this resource.
-* isFresh() - Returns `true` if the Payload is fresh (has data from the server, and that data has not yet passed its time to live).
-* isStale() - Returns `true` if the Payload is stale (has data from the server, but that data has passed its time to live).
-* isValid() - Returns `true` if the Payload contains a result that completed successfully against the server.
+* *data* - Getter that gives you the data that the cache has received from the server for this query, or the empty model if it does not yet have data.
+* *promise* - Getter that gives you a promise representing any pending query against the server. This is always available, even if there is not one currently pending (in that case it is a promise that immediately resolves with `data` from above)
+* *error* - Getter that gives you the error that the server received the last time this query completed against this resource.
+* *hasServerData()* - Returns `true` if this payload represents data from the server (whether stale or not).
+* *isPending()* - Returns `true` if there is currently a query pending against the server for data.
+* *isEmpty()* - Returns `true` if the Payload is empty and its data is the empty model specified on configuration of this resource.
+* *isFresh()* - Returns `true` if the Payload is fresh (has data from the server, and that data has not yet passed its time to live).
+* *isStale()* - Returns `true` if the Payload is stale (has data from the server, but that data has passed its time to live).
+* *isValid()* - Returns `true` if the Payload contains a result that completed successfully against the server.
 
 
 ### Querying a Resource
 
 A resource may be queried via the `queryResource` method described above. The queryResource method takes in a JSON query config object which may have the following attributes specified:
 
-* id - _string_ - Required. This should match the ID of the `resource` you want to query that you have already added to the API.
-* query - _object_ - Optional. An object containing query parameter name -> value mappings. E.g. `query: { foo: 'bar' }` will result in the query being made with `?foo=bar`.
-* params - _object_ - Optional. An object containing any path parameters you want to substitute in the endpoint template. The keys must match the names specified in the template (see `endpointTemplate` under `Resource`)
-* header - _object_ - Optional. Custom header to be merged with any authentication header you may have specified with the API already.
-* method - _string_ - Optional. One of `'get'`, `'post'`, `'put'`, `'delete'`. The HTTP method to use when querying this resource. Defaults to `'get'`.
-* payload - _object_ - Optional. The payload to send in the body of the request.
-* forceRefresh - _boolean_ - Optional. Notifies the cache to mark all of its data as stale upon successful completion of this query.
-* customHookData - _object_ - Optional. Custom object to be passed along with the `change` event upon completion of this request.
+* *id* - _string_ - Required. This should match the ID of the `resource` you want to query that you have already added to the API.
+* *query* - _object_ - Optional. An object containing query parameter name -> value mappings. E.g. `query: { foo: 'bar' }` will result in the query being made with `?foo=bar`.
+* *params* - _object_ - Optional. An object containing any path parameters you want to substitute in the endpoint template. The keys must match the names specified in the template (see `endpointTemplate` under `Resource`)
+* *header* - _object_ - Optional. Custom header to be merged with any authentication header you may have specified with the API already.
+* *method* - _string_ - Optional. One of `'get'`, `'post'`, `'put'`, `'delete'`. The HTTP method to use when querying this resource. Defaults to `'get'`.
+* *payload* - _object_ - Optional. The payload to send in the body of the request.
+* *forceRefresh* - _boolean_ - Optional. Notifies the cache to mark all of its data as stale upon successful completion of this query.
+* *customHookData* - _object_ - Optional. Custom object to be passed along with the `change` event upon completion of this request.
