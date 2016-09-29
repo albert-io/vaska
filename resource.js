@@ -361,12 +361,16 @@ class Resource {
             modelInterface: this.modelInterface
           });
         // Last GET for this resource failed and the cache is not yet expired
-        } else if (!data.get('success') && (now - data.get('timestamp')) < this.timeUntilStale) {
+        } else if (!data.get('success')) {
+          const promise = (now - data.get('timestamp') < this.timeUntilStale ?
+            new Promise((resolve, reject) => {
+              reject(data.get('data'));
+            }) :
+            this.makeFetch(apiParams);
+
           return new Payload({
             status: DataStatus.ERROR,
-            promise: new Promise((resolve, reject) => {
-              reject(data.get('data'));
-            }),
+            promise: promise,
             data: this.model,
             error: data.get('data'),
             customHookData,

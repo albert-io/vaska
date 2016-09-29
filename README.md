@@ -13,6 +13,9 @@ Our main platform at [albert.io](https://www.albert.io) is a single page applica
 
 ## Usage
 
+### Available as an NPM package
+`npm install vaska`
+
 ### Simple case:
 
 To begin, we need only the `ExternalAPI` class from the library. This class represents a single REST API with which your application will communicate.
