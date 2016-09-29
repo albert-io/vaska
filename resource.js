@@ -350,7 +350,7 @@ class Resource {
         const data = this.cache.get(cacheKey);
 
         // GET is already pending
-        if (data.has('pendingGet')) {
+        if (data.has('pendingGet') && data.get('success')) {
           const status = data.get('data') ? DataStatus.STALE : DataStatus.EMPTY;
           const payload = status === DataStatus.EMPTY ? this.model : data.get('data');
           return new Payload({
