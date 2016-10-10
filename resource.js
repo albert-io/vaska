@@ -522,6 +522,7 @@ class Resource {
   makePut({
     path = '',
     payload,
+    query,
     header,
     customHookData
   }) {
@@ -531,6 +532,7 @@ class Resource {
     const pendingPut = new Promise((resolve, reject) => {
       request
         .put(fullPath)
+        .query(query)
         .send(payload)
         .timeout(this.parentApi.timeout)
         .set(header)
@@ -567,6 +569,7 @@ class Resource {
   makePost({
     path = '',
     payload,
+    query,
     header,
     customHookData
   }) {
@@ -576,6 +579,7 @@ class Resource {
     const pendingPost = new Promise((resolve, reject) => {
       request
         .post(fullPath)
+        .query(query)
         .send(payload)
         .timeout(this.parentApi.timeout)
         .set(header)
@@ -611,6 +615,7 @@ class Resource {
 
   makeDelete({
     path = '',
+    query,
     header,
     customHookData
   }) {
@@ -620,6 +625,7 @@ class Resource {
     const pendingDelete = new Promise((resolve, reject) => {
       request
         .del(fullPath)
+        .query(query)
         .timeout(this.parentApi.timeout)
         .set(header)
         .end((err, res) => {
